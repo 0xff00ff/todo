@@ -11,11 +11,14 @@ export function useAutoSave(data, delay = 1500) {
   const dataRef = useRef(data);
   dataRef.current = data;
 
-  // Fix #6: Only trigger save when section content actually changes,
+  // Fix #6: Only trigger save when actual persisted content changes,
   // not when activeSectionId changes (which is a UI-only concern)
-  const sectionsSnapshot = useMemo(() => {
-    return JSON.stringify(data.sections);
-  }, [data.sections]);
+  const saveTriggerSnapshot = useMemo(() => {
+    return JSON.stringify({
+      sections: data.sections,
+      isEditMode: data.isEditMode
+    });
+  }, [data.sections, data.isEditMode]);
 
   useEffect(() => {
     // Skip auto-save on initial mount
@@ -40,7 +43,7 @@ export function useAutoSave(data, delay = 1500) {
     }, delay);
 
     return () => clearTimeout(timer);
-  }, [sectionsSnapshot, delay]);
+  }, [saveTriggerSnapshot, delay]);
 
   return { saveStatus, lastSavedTime };
 }
