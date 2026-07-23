@@ -20,16 +20,16 @@ export function Sidebar({
       <div className="sidebar-header">
         <div className="brand">
           <span className="brand-icon">📋</span>
-          <h2>Разделы</h2>
+          <h2>Sections</h2>
         </div>
         {isEditMode && (
           <button
             className="btn btn-primary btn-add-section"
             onClick={onCreateSection}
             id="add-section-btn"
-            title="Создать новый раздел"
+            title="Create new section"
           >
-            <span>+</span> Новый раздел
+            <span>+</span> New Section
           </button>
         )}
       </div>
@@ -37,7 +37,7 @@ export function Sidebar({
       <div className="sidebar-search">
         <input
           type="text"
-          placeholder="Поиск разделов..."
+          placeholder="Search sections..."
           value={searchQuery}
           onInput={(e) => setSearchQuery(e.target.value)}
           className="search-input"
@@ -48,24 +48,24 @@ export function Sidebar({
       <div className="sections-list" id="sections-list">
         {filteredSections.length === 0 ? (
           <div className="empty-state">
-            {searchQuery ? 'Разделы не найдены' : 'Нет разделов. Создайте первый!'}
+            {searchQuery ? 'No sections found' : 'No sections yet. Create your first one!'}
           </div>
         ) : (
           filteredSections.map(section => {
             const isActive = section.id === activeSectionId;
             
-            let typeBadge = 'Текст';
+            let typeBadge = 'Text';
             let itemCountInfo = null;
 
             if (section.contentType === 'list' && Array.isArray(section.content)) {
-              typeBadge = 'Список';
-              itemCountInfo = `${section.content.length} эл.`;
+              typeBadge = 'List';
+              itemCountInfo = `${section.content.length} items`;
             } else if (section.contentType === 'tasks' && Array.isArray(section.content)) {
-              typeBadge = 'Задачи';
+              typeBadge = 'Tasks';
               const completed = section.content.filter(t => t.completed).length;
               itemCountInfo = `${completed}/${section.content.length}`;
             } else if (section.contentType === 'image') {
-              typeBadge = 'Картинка';
+              typeBadge = 'Image';
             }
 
             return (
@@ -77,7 +77,7 @@ export function Sidebar({
               >
                 <div className="section-item-main">
                   <span className="section-item-title">
-                    {section.title || 'Без названия'}
+                    {section.title || 'Untitled'}
                   </span>
                   <div className="section-item-meta">
                     <span className={`type-badge badge-${section.contentType}`}>
@@ -96,11 +96,11 @@ export function Sidebar({
                     className="btn-icon btn-delete-section"
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (confirm(`Удалить раздел "${section.title}"?`)) {
+                      if (confirm(`Delete section "${section.title}"?`)) {
                         onDeleteSection(section.id);
                       }
                     }}
-                    title="Удалить раздел"
+                    title="Delete section"
                     id={`delete-section-btn-${section.id}`}
                   >
                     ✕

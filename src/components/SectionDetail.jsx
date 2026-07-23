@@ -6,7 +6,7 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
   if (!section) {
     return (
       <div className="section-detail-empty">
-        <p>Выберите раздел слева или создайте новый.</p>
+        <p>Select a section on the left or create a new one.</p>
       </div>
     );
   }
@@ -117,7 +117,7 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      alert('Пожалуйста, выберите файл изображения.');
+      alert('Please select an image file.');
       return;
     }
 
@@ -149,47 +149,47 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
             type="text"
             value={section.title}
             onInput={handleTitleChange}
-            placeholder="Заголовок раздела..."
+            placeholder="Section Title..."
             className="section-title-input"
             id="section-title-input"
           />
         ) : (
-          <h2 className="section-title-heading">{section.title || 'Без названия'}</h2>
+          <h2 className="section-title-heading">{section.title || 'Untitled'}</h2>
         )}
       </div>
 
       {/* Content Type Selector Tabs (Only in Edit Mode) */}
       {isEditMode && (
         <div className="content-type-selector">
-          <span className="selector-label">Тип контента:</span>
+          <span className="selector-label">Content Type:</span>
           <div className="tab-group">
             <button
               className={`tab-btn ${section.contentType === 'text' ? 'active' : ''}`}
               onClick={() => handleContentTypeChange('text')}
               id="tab-btn-text"
             >
-              📝 Текст
+              📝 Text
             </button>
             <button
               className={`tab-btn ${section.contentType === 'list' ? 'active' : ''}`}
               onClick={() => handleContentTypeChange('list')}
               id="tab-btn-list"
             >
-              ☑ Список
+              ☑ List
             </button>
             <button
               className={`tab-btn ${section.contentType === 'tasks' ? 'active' : ''}`}
               onClick={() => handleContentTypeChange('tasks')}
               id="tab-btn-tasks"
             >
-              ☑️ Задачи
+              ☑️ Tasks
             </button>
             <button
               className={`tab-btn ${section.contentType === 'image' ? 'active' : ''}`}
               onClick={() => handleContentTypeChange('image')}
               id="tab-btn-image"
             >
-              🖼 Картинка
+              🖼 Image
             </button>
           </div>
         </div>
@@ -205,13 +205,13 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
                 <textarea
                   value={typeof section.content === 'string' ? section.content : ''}
                   onInput={handleTextChange}
-                  placeholder="Введите текст раздела здесь..."
+                  placeholder="Enter section text here..."
                   className="content-textarea"
                   id="content-textarea"
                   rows={8}
                 />
                 <div className="conversion-hint">
-                  💡 <span>Подсказка: переключение на "Список" или "Задачи" автоматически разбьет текст по строкам.</span>
+                  💡 <span>Hint: Switching to "List" or "Tasks" will automatically split text by lines.</span>
                 </div>
               </>
             ) : (
@@ -219,7 +219,7 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
                 {typeof section.content === 'string' && section.content.trim() ? (
                   section.content
                 ) : (
-                  <span className="empty-text-placeholder">Текст раздела отсутствует.</span>
+                  <span className="empty-text-placeholder">No section text available.</span>
                 )}
               </div>
             )}
@@ -236,7 +236,7 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
                   value={newItemText}
                   onInput={(e) => setNewItemText(e.target.value)}
                   onKeyDown={handleListItemKeyDown}
-                  placeholder="Добавить пункт в список..."
+                  placeholder="Add item to list..."
                   className="list-add-input"
                   id="list-add-input"
                 />
@@ -245,14 +245,14 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
                   onClick={handleAddListItem}
                   id="btn-add-list-item"
                 >
-                  + Добавить
+                  + Add
                 </button>
               </div>
             )}
 
             <ul className="content-list-items" id="content-list-items">
               {listItems.length === 0 ? (
-                <li className="empty-list-notice">Список пуст.</li>
+                <li className="empty-list-notice">List is empty.</li>
               ) : (
                 listItems.map((item, idx) => (
                   <li key={idx} className="content-list-row">
@@ -275,7 +275,7 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
                       <button
                         className="btn-icon btn-remove-item"
                         onClick={() => handleRemoveListItem(idx)}
-                        title="Удалить пункт"
+                        title="Delete item"
                         id={`btn-remove-list-item-${idx}`}
                       >
                         ✕
@@ -287,7 +287,7 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
             </ul>
             {isEditMode && (
               <div className="conversion-hint">
-                💡 <span>Подсказка: переключение на "Текст" объединит все пункты через перенос строки.</span>
+                💡 <span>Hint: Switching to "Text" will join all items with line breaks.</span>
               </div>
             )}
           </div>
@@ -299,7 +299,7 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
             <div className="task-list-header">
               <div className="task-header-title">
                 <span className="task-counter">
-                  {completedTasksCount} из {totalTasksCount} выполнено
+                  {completedTasksCount} of {totalTasksCount} completed
                 </span>
               </div>
 
@@ -309,21 +309,21 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
                   onClick={() => setTaskFilter('all')}
                   id="filter-task-all"
                 >
-                  Все ({totalTasksCount})
+                  All ({totalTasksCount})
                 </button>
                 <button
                   className={`filter-btn ${taskFilter === 'active' ? 'active' : ''}`}
                   onClick={() => setTaskFilter('active')}
                   id="filter-task-active"
                 >
-                  Активные ({totalTasksCount - completedTasksCount})
+                  Active ({totalTasksCount - completedTasksCount})
                 </button>
                 <button
                   className={`filter-btn ${taskFilter === 'completed' ? 'active' : ''}`}
                   onClick={() => setTaskFilter('completed')}
                   id="filter-task-completed"
                 >
-                  Готовые ({completedTasksCount})
+                  Completed ({completedTasksCount})
                 </button>
               </div>
             </div>
@@ -343,7 +343,7 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
                   value={newItemText}
                   onInput={(e) => setNewItemText(e.target.value)}
                   onKeyDown={handleTaskKeyDown}
-                  placeholder="Новая задача..."
+                  placeholder="New task..."
                   className="task-add-input"
                   id="task-add-input"
                 />
@@ -352,7 +352,7 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
                   onClick={handleAddTask}
                   id="btn-add-task"
                 >
-                  + Добавить
+                  + Add
                 </button>
               </div>
             )}
@@ -360,7 +360,7 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
             <div className="task-items-container" id="task-items-container">
               {filteredTasks.length === 0 ? (
                 <div className="empty-tasks-notice">
-                  {totalTasksCount === 0 ? 'Список задач пуст.' : 'Задачи не найдены'}
+                  {totalTasksCount === 0 ? 'Task list is empty.' : 'No tasks found'}
                 </div>
               ) : (
                 filteredTasks.map((task) => (
@@ -395,7 +395,7 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
                       <button
                         className="btn-icon btn-delete-task"
                         onClick={() => handleRemoveTask(task.id)}
-                        title="Удалить задачу"
+                        title="Delete task"
                         id={`delete-task-btn-${task.id}`}
                       >
                         ✕
@@ -407,7 +407,7 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
             </div>
             {isEditMode && (
               <div className="conversion-hint" style={{ marginTop: '12px' }}>
-                💡 <span>Подсказка: при переключении на "Текст" или "Список" наименования задач сохраняются.</span>
+                💡 <span>Hint: Switching to "Text" or "List" preserves task titles.</span>
               </div>
             )}
           </div>
@@ -422,12 +422,12 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
                   type="text"
                   value={typeof section.content === 'string' ? section.content : ''}
                   onInput={handleImageUrlChange}
-                  placeholder="Вставьте URL изображения (http://...)"
+                  placeholder="Paste image URL (http://...)"
                   className="image-url-input"
                   id="image-url-input"
                 />
                 <label className="btn btn-secondary file-upload-label">
-                  📁 Загрузить файл
+                  📁 Upload File
                   <input
                     type="file"
                     accept="image/*"
@@ -443,7 +443,7 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
               {typeof section.content === 'string' && section.content.trim() ? (
                 <img
                   src={section.content}
-                  alt={section.title || 'Изображение раздела'}
+                  alt={section.title || 'Section Image'}
                   className="section-preview-image"
                   onError={(e) => {
                     e.target.style.display = 'none';
@@ -456,7 +456,7 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
                 />
               ) : null}
               <div className="image-error-fallback" style={{ display: !section.content ? 'block' : 'none' }}>
-                {section.content ? 'Не удалось загрузить изображение по указанному URL' : 'Изображение не выбрано'}
+                {section.content ? 'Failed to load image from URL' : 'No image selected'}
               </div>
             </div>
           </div>

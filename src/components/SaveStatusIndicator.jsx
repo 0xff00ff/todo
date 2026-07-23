@@ -6,21 +6,21 @@ export function SaveStatusIndicator({ saveStatus, lastSavedTime }) {
       {saveStatus === 'saving' && (
         <>
           <span className="spinner" />
-          <span>Сохранение...</span>
+          <span>Saving...</span>
         </>
       )}
 
       {saveStatus === 'saved' && (
         <>
           <span className="icon-check">✓</span>
-          <span>Сохранено {lastSavedTime ? `в ${lastSavedTime}` : ''}</span>
+          <span>Saved {lastSavedTime ? `at ${lastSavedTime}` : ''}</span>
         </>
       )}
 
       {saveStatus === 'error' && (
         <>
           <span className="icon-error">⚠</span>
-          <span>Ошибка сохранения</span>
+          <span>Save error</span>
         </>
       )}
     </div>

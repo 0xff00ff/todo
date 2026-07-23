@@ -8,7 +8,7 @@ import { SaveStatusIndicator } from './components/SaveStatusIndicator';
 
 export function App() {
   const [appData, setAppData] = useState(() => loadAppData());
-  const [isEditMode, setIsEditMode] = useState(true); // true = Редактирование, false = Режим работы
+  const [isEditMode, setIsEditMode] = useState(true); // true = Edit Mode, false = Work Mode
 
   const { saveStatus, lastSavedTime } = useAutoSave(appData, 1500);
 
@@ -31,7 +31,7 @@ export function App() {
     const newId = 'sec-' + Date.now();
     const newSection = {
       id: newId,
-      title: 'Новый раздел',
+      title: 'New Section',
       contentType: 'text',
       content: '',
       createdAt: Date.now(),
@@ -98,14 +98,14 @@ export function App() {
               onClick={() => setIsEditMode(true)}
               id="mode-edit-btn"
             >
-              ✏️ Редактирование
+              ✏️ Edit Mode
             </button>
             <button
               className={`mode-btn ${!isEditMode ? 'active' : ''}`}
               onClick={() => setIsEditMode(false)}
               id="mode-work-btn"
             >
-              👁️ Режим работы
+              👁️ Work Mode
             </button>
           </div>
 
@@ -127,11 +127,11 @@ export function App() {
         ) : (
           <div className="empty-workspace">
             <div className="empty-icon">📁</div>
-            <h2>Раздел не выбран</h2>
-            <p>Выберите существующий раздел слева или создайте новый.</p>
+            <h2>No Section Selected</h2>
+            <p>Select an existing section on the left or create a new one to get started.</p>
             {isEditMode && (
               <button className="btn btn-primary" onClick={handleCreateSection}>
-                + Создать раздел
+                + Create Section
               </button>
             )}
           </div>
