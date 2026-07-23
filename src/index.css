@@ -171,13 +171,18 @@ body {
   color: var(--text-dim);
 }
 
-.btn-delete-section {
+.section-actions-group {
   opacity: 0.5;
   transition: opacity 0.15s;
 }
 
-.section-item:hover .btn-delete-section {
+.section-item:hover .section-actions-group {
   opacity: 1;
+}
+
+.btn-pin-section.pinned {
+  opacity: 1;
+  color: var(--warning);
 }
 
 /* Main Content Area (Right Part) */

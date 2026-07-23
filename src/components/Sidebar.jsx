@@ -7,14 +7,19 @@ export function Sidebar({
   onSelectSection,
   onCreateSection,
   onDeleteSection,
+  onTogglePin,
   isEditMode
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
-  const filteredSections = sections.filter(sec =>
-    sec.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredSections = sections
+    .filter(sec => sec.title.toLowerCase().includes(searchQuery.toLowerCase()))
+    .sort((a, b) => {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      return 0;
+    });
 
   // Fix #9: Inline delete confirmation instead of native confirm()
   const handleDeleteClick = (e, sectionId) => {
@@ -92,14 +97,25 @@ export function Sidebar({
                 </div>
 
                 {isEditMode && (
-                  <button
-                    className={`btn-icon btn-delete-section ${isConfirming ? 'confirming' : ''}`}
-                    onClick={(e) => handleDeleteClick(e, section.id)}
-                    title={isConfirming ? 'Click again to confirm' : 'Delete section'}
-                    id={`delete-section-btn-${section.id}`}
-                  >
-                    {isConfirming ? '⚠ Sure?' : '✕'}
-                  </button>
+                  <div className="section-actions-group" style={{ display: 'flex', gap: '4px' }}>
+                    <button
+                      className={`btn-icon btn-pin-section ${section.isPinned ? 'pinned' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onTogglePin(section.id);
+                      }}
+                      title={section.isPinned ? 'Unpin section' : 'Pin section to top'}
+                    >
+                      {section.isPinned ? '📌' : '📍'}
+                    </button>
+                    <button
+                      className={`btn-icon btn-delete-section ${isConfirming ? 'confirming' : ''}`}
+                      onClick={(e) => handleDeleteClick(e, section.id)}
+                      title={isConfirming ? 'Click again to confirm' : 'Delete section'}
+                    >
+                      {isConfirming ? '⚠ Sure?' : '✕'}
+                    </button>
+                  </div>
                 )}
               </div>
             );

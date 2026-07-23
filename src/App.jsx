@@ -85,6 +85,19 @@ export function App() {
     });
   };
 
+  // Handler: Toggle Pin Section
+  const handleTogglePinSection = (id) => {
+    setAppData(prev => ({
+      ...prev,
+      sections: prev.sections.map(sec => {
+        if (sec.id === id) {
+          return { ...sec, isPinned: !sec.isPinned, updatedAt: Date.now() };
+        }
+        return sec;
+      })
+    }));
+  };
+
   return (
     <div className="app-container" id="app-container">
       {/* Left Sidebar */}
@@ -94,6 +107,7 @@ export function App() {
         onSelectSection={handleSelectSection}
         onCreateSection={handleCreateSection}
         onDeleteSection={handleDeleteSection}
+        onTogglePin={handleTogglePinSection}
         isEditMode={isEditMode}
       />
 

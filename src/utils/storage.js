@@ -1,4 +1,5 @@
-const STORAGE_KEY = 'todo_manager_app_data_v1';
+const STORAGE_KEY = 'todo_manager_app_data';
+const LEGACY_STORAGE_KEY = 'todo_manager_app_data_v1';
 const CURRENT_VERSION = 3;
 
 // Default initial data for first-time visitors (empty state)
@@ -67,7 +68,18 @@ function migrateData(data) {
  */
 export function loadAppData() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    let raw = localStorage.getItem(STORAGE_KEY);
+    let usedLegacyKey = false;
+    
+    // Check old key if new key has no data
+    if (!raw) {
+      raw = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (raw) {
+        usedLegacyKey = true;
+        console.log('Found data in legacy storage key, migrating...');
+      }
+    }
+
     if (!raw) return DEFAULT_DATA;
     
     let parsed = JSON.parse(raw);
@@ -76,9 +88,13 @@ export function loadAppData() {
     }
 
     // Apply migrations if necessary
-    if (parsed.version !== CURRENT_VERSION) {
+    if (parsed.version !== CURRENT_VERSION || usedLegacyKey) {
       parsed = migrateData(parsed);
-      saveAppData(parsed); // Immediately persist the migrated format
+      saveAppData(parsed); // Immediately persist the migrated format to the new key
+      
+      if (usedLegacyKey) {
+        localStorage.removeItem(LEGACY_STORAGE_KEY); // Clean up the old key
+      }
     }
 
     return parsed;
