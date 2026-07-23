@@ -1,9 +1,10 @@
 const STORAGE_KEY = 'todo_manager_app_data_v1';
-const CURRENT_VERSION = 2;
+const CURRENT_VERSION = 3;
 
 // Default initial data for first-time visitors (empty state)
 const DEFAULT_DATA = {
   version: CURRENT_VERSION,
+  isEditMode: true,
   activeSectionId: null,
   sections: [],
   lastSaved: null
@@ -15,13 +16,11 @@ const DEFAULT_DATA = {
 function migrateData(data) {
   let migrated = { ...data };
 
-  // If no version is specified, it's version 1 (single content per section)
+  // v1 -> v2: Single content to blocks array
   if (!migrated.version || migrated.version === 1) {
     console.log('Migrating data from v1 to v2 (multi-block support)...');
     migrated.sections = migrated.sections.map(sec => {
       const blockId = 'blk-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
-      
-      // Handle the case where a v1 section might somehow be missing fields
       const type = sec.contentType || 'text';
       const content = sec.content !== undefined ? sec.content : '';
 
@@ -42,10 +41,23 @@ function migrateData(data) {
     migrated.version = 2;
   }
 
-  // Future migrations would go here:
-  // if (migrated.version === 2) {
-  //   migrated = migrateV2toV3(migrated);
-  // }
+  // v2 -> v3: Add isEditMode to root, add taskFilter to blocks
+  if (migrated.version === 2) {
+    console.log('Migrating data from v2 to v3 (persist UI state)...');
+    if (migrated.isEditMode === undefined) {
+      migrated.isEditMode = true;
+    }
+    
+    migrated.sections = migrated.sections.map(sec => ({
+      ...sec,
+      blocks: Array.isArray(sec.blocks) ? sec.blocks.map(b => ({
+        ...b,
+        taskFilter: b.taskFilter || 'all'
+      })) : []
+    }));
+    
+    migrated.version = 3;
+  }
 
   return migrated;
 }
@@ -66,8 +78,7 @@ export function loadAppData() {
     // Apply migrations if necessary
     if (parsed.version !== CURRENT_VERSION) {
       parsed = migrateData(parsed);
-      // We don't save immediately here to avoid side effects during render,
-      // but the next auto-save will persist the migrated data.
+      saveAppData(parsed); // Immediately persist the migrated format
     }
 
     return parsed;

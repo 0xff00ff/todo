@@ -13,20 +13,22 @@ export function ContentBlock({
   isLast
 }) {
   const [newItemText, setNewItemText] = useState('');
-  const [taskFilter, setTaskFilter] = useState('all'); // 'all' | 'active' | 'completed'
   const [imageError, setImageError] = useState(false);
+
+  // Use persisted task filter or default to 'all'
+  const taskFilter = block.taskFilter || 'all';
 
   // Handle Content Type switch (with auto-conversion)
   const handleTypeChange = (newType) => {
     if (newType === block.type) return;
     const convertedContent = convertContent(block.content, newType);
-    onUpdate(block.id, newType, convertedContent);
+    onUpdate(block.id, { type: newType, content: convertedContent });
     setNewItemText('');
   };
 
   // --- TEXT MODE HANDLERS ---
   const handleTextChange = (e) => {
-    onUpdate(block.id, block.type, e.target.value);
+    onUpdate(block.id, { content: e.target.value });
   };
 
   // --- LIST MODE HANDLERS ---
@@ -34,7 +36,7 @@ export function ContentBlock({
     if (!newItemText.trim()) return;
     const currentList = Array.isArray(block.content) ? block.content : [];
     const newItem = { id: 'li-' + Date.now() + '-' + Math.floor(Math.random()*1000), text: newItemText.trim() };
-    onUpdate(block.id, block.type, [...currentList, newItem]);
+    onUpdate(block.id, { content: [...currentList, newItem] });
     setNewItemText('');
   };
 
@@ -51,12 +53,12 @@ export function ContentBlock({
       if (item.id === itemId) return { ...item, text: value };
       return item;
     });
-    onUpdate(block.id, block.type, updatedList);
+    onUpdate(block.id, { content: updatedList });
   };
 
   const handleRemoveListItem = (itemId) => {
     const currentList = Array.isArray(block.content) ? block.content : [];
-    onUpdate(block.id, block.type, currentList.filter(item => item.id !== itemId));
+    onUpdate(block.id, { content: currentList.filter(item => item.id !== itemId) });
   };
 
   // --- TASKS MODE HANDLERS ---
@@ -68,7 +70,7 @@ export function ContentBlock({
       title: newItemText.trim(),
       completed: false
     };
-    onUpdate(block.id, block.type, [...currentTasks, newTask]);
+    onUpdate(block.id, { content: [...currentTasks, newTask] });
     setNewItemText('');
   };
 
@@ -85,7 +87,7 @@ export function ContentBlock({
       if (t.id === taskId) return { ...t, completed: !t.completed };
       return t;
     });
-    onUpdate(block.id, block.type, updatedTasks);
+    onUpdate(block.id, { content: updatedTasks });
   };
 
   const handleEditTaskTitle = (taskId, newTitle) => {
@@ -94,18 +96,18 @@ export function ContentBlock({
       if (t.id === taskId) return { ...t, title: newTitle };
       return t;
     });
-    onUpdate(block.id, block.type, updatedTasks);
+    onUpdate(block.id, { content: updatedTasks });
   };
 
   const handleRemoveTask = (taskId) => {
     const currentTasks = Array.isArray(block.content) ? block.content : [];
-    onUpdate(block.id, block.type, currentTasks.filter(t => t.id !== taskId));
+    onUpdate(block.id, { content: currentTasks.filter(t => t.id !== taskId) });
   };
 
   // --- IMAGE MODE HANDLERS ---
   const handleImageUrlChange = (e) => {
     setImageError(false);
-    onUpdate(block.id, block.type, e.target.value);
+    onUpdate(block.id, { content: e.target.value });
   };
 
   const handleFileUpload = (e) => {
@@ -118,7 +120,7 @@ export function ContentBlock({
     const reader = new FileReader();
     reader.onload = (event) => {
       setImageError(false);
-      onUpdate(block.id, block.type, event.target.result);
+      onUpdate(block.id, { content: event.target.result });
     };
     reader.readAsDataURL(file);
   };
@@ -133,7 +135,7 @@ export function ContentBlock({
         const reader = new FileReader();
         reader.onload = (event) => {
           setImageError(false);
-          onUpdate(block.id, block.type, event.target.result);
+          onUpdate(block.id, { content: event.target.result });
         };
         reader.readAsDataURL(file);
         e.preventDefault(); // Prevent text paste if we handled an image
@@ -323,19 +325,19 @@ export function ContentBlock({
               <div className="task-filter-tabs">
                 <button
                   className={`filter-btn ${taskFilter === 'all' ? 'active' : ''}`}
-                  onClick={() => setTaskFilter('all')}
+                  onClick={() => onUpdate(block.id, { taskFilter: 'all' })}
                 >
                   All ({taskStats.total})
                 </button>
                 <button
                   className={`filter-btn ${taskFilter === 'active' ? 'active' : ''}`}
-                  onClick={() => setTaskFilter('active')}
+                  onClick={() => onUpdate(block.id, { taskFilter: 'active' })}
                 >
                   Active ({taskStats.total - taskStats.completed})
                 </button>
                 <button
                   className={`filter-btn ${taskFilter === 'completed' ? 'active' : ''}`}
-                  onClick={() => setTaskFilter('completed')}
+                  onClick={() => onUpdate(block.id, { taskFilter: 'completed' })}
                 >
                   Completed ({taskStats.completed})
                 </button>

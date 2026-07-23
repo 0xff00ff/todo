@@ -27,10 +27,10 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
     onUpdateSection(section.id, { blocks: [...blocks, newBlock] });
   };
 
-  const handleUpdateBlock = (blockId, newType, newContent) => {
+  const handleUpdateBlock = (blockId, partialUpdate) => {
     const updatedBlocks = blocks.map(b => {
       if (b.id === blockId) {
-        return { ...b, type: newType, content: newContent };
+        return { ...b, ...partialUpdate };
       }
       return b;
     });

@@ -8,7 +8,11 @@ import { SaveStatusIndicator } from './components/SaveStatusIndicator';
 
 export function App() {
   const [appData, setAppData] = useState(() => loadAppData());
-  const [isEditMode, setIsEditMode] = useState(true); // true = Edit Mode, false = Work Mode
+  const isEditMode = appData.isEditMode;
+
+  const setIsEditMode = (newValue) => {
+    setAppData(prev => ({ ...prev, isEditMode: newValue }));
+  };
 
   const { saveStatus, lastSavedTime } = useAutoSave(appData, 1500);
 
