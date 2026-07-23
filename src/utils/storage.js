@@ -1,32 +1,10 @@
 const STORAGE_KEY = 'todo_manager_app_data_v1';
 
-// Default initial data for first-time visitors
+// Default initial data for first-time visitors (empty state)
 const DEFAULT_DATA = {
-  activeSectionId: 'sec-1',
-  sections: [
-    {
-      id: 'sec-1',
-      title: 'План работы на неделю',
-      contentType: 'tasks',
-      content: [
-        { id: 't-1', title: 'Разработать прототип приложения', completed: true },
-        { id: 't-2', title: 'Настроить автоматическое сохранение в LocalStorage', completed: true },
-        { id: 't-3', title: 'Проверить взаимную конвертацию между типами', completed: false },
-        { id: 't-4', title: 'Оптимизировать производительность интерфейса', completed: false }
-      ],
-      createdAt: Date.now() - 3600000,
-      updatedAt: Date.now() - 3600000
-    },
-    {
-      id: 'sec-2',
-      title: 'Заметки и идеи',
-      contentType: 'text',
-      content: 'Идея для проекта: Создать простой и быстрый менеджер задач без лишних элементов.\nОсобый акцент сделать на быстродействие и мгновенное сохранение.\nПоддерживать текстовый режим, списки, задачи и картинки.',
-      createdAt: Date.now() - 7200000,
-      updatedAt: Date.now() - 7200000
-    }
-  ],
-  lastSaved: Date.now()
+  activeSectionId: null,
+  sections: [],
+  lastSaved: null
 };
 
 /**
