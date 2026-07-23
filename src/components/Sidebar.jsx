@@ -10,10 +10,26 @@ export function Sidebar({
   isEditMode
 }) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   const filteredSections = sections.filter(sec =>
     sec.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Fix #9: Inline delete confirmation instead of native confirm()
+  const handleDeleteClick = (e, sectionId) => {
+    e.stopPropagation();
+    if (confirmDeleteId === sectionId) {
+      // Second click — actually delete
+      onDeleteSection(sectionId);
+      setConfirmDeleteId(null);
+    } else {
+      // First click — enter confirmation mode
+      setConfirmDeleteId(sectionId);
+      // Auto-cancel after 3 seconds
+      setTimeout(() => setConfirmDeleteId((prev) => prev === sectionId ? null : prev), 3000);
+    }
+  };
 
   return (
     <aside className="sidebar" id="sidebar-container">
@@ -68,6 +84,8 @@ export function Sidebar({
               typeBadge = 'Image';
             }
 
+            const isConfirming = confirmDeleteId === section.id;
+
             return (
               <div
                 key={section.id}
@@ -93,17 +111,12 @@ export function Sidebar({
 
                 {isEditMode && (
                   <button
-                    className="btn-icon btn-delete-section"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (confirm(`Delete section "${section.title}"?`)) {
-                        onDeleteSection(section.id);
-                      }
-                    }}
-                    title="Delete section"
+                    className={`btn-icon btn-delete-section ${isConfirming ? 'confirming' : ''}`}
+                    onClick={(e) => handleDeleteClick(e, section.id)}
+                    title={isConfirming ? 'Click again to confirm' : 'Delete section'}
                     id={`delete-section-btn-${section.id}`}
                   >
-                    ✕
+                    {isConfirming ? '⚠ Sure?' : '✕'}
                   </button>
                 )}
               </div>

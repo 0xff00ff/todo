@@ -1,5 +1,5 @@
 import { h } from 'preact';
-import { useState } from 'preact/hooks';
+import { useState, useMemo } from 'preact/hooks';
 import { convertContent } from '../utils/storage';
 
 export function SectionDetail({ section, onUpdateSection, isEditMode }) {
@@ -13,6 +13,7 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
 
   const [newItemText, setNewItemText] = useState('');
   const [taskFilter, setTaskFilter] = useState('all'); // 'all' | 'active' | 'completed'
+  const [imageError, setImageError] = useState(false);
 
   // Handle Title change
   const handleTitleChange = (e) => {
@@ -28,6 +29,8 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
       contentType: newType,
       content: convertedContent
     });
+    // Fix #2: Reset input when switching content types
+    setNewItemText('');
   };
 
   // --- TEXT MODE HANDLER ---
@@ -39,8 +42,8 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
   const handleAddListItem = () => {
     if (!newItemText.trim()) return;
     const currentList = Array.isArray(section.content) ? section.content : [];
-    const updatedList = [...currentList, newItemText.trim()];
-    onUpdateSection(section.id, { content: updatedList });
+    const newItem = { id: 'li-' + Date.now(), text: newItemText.trim() };
+    onUpdateSection(section.id, { content: [...currentList, newItem] });
     setNewItemText('');
   };
 
@@ -51,16 +54,18 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
     }
   };
 
-  const handleEditListItem = (index, value) => {
-    const currentList = Array.isArray(section.content) ? [...section.content] : [];
-    currentList[index] = value;
-    onUpdateSection(section.id, { content: currentList });
+  const handleEditListItem = (itemId, value) => {
+    const currentList = Array.isArray(section.content) ? section.content : [];
+    const updatedList = currentList.map(item => {
+      if (item.id === itemId) return { ...item, text: value };
+      return item;
+    });
+    onUpdateSection(section.id, { content: updatedList });
   };
 
-  const handleRemoveListItem = (index) => {
-    const currentList = Array.isArray(section.content) ? [...section.content] : [];
-    currentList.splice(index, 1);
-    onUpdateSection(section.id, { content: currentList });
+  const handleRemoveListItem = (itemId) => {
+    const currentList = Array.isArray(section.content) ? section.content : [];
+    onUpdateSection(section.id, { content: currentList.filter(item => item.id !== itemId) });
   };
 
   // --- TASKS MODE HANDLERS ---
@@ -109,6 +114,7 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
 
   // --- IMAGE MODE HANDLERS ---
   const handleImageUrlChange = (e) => {
+    setImageError(false);
     onUpdateSection(section.id, { content: e.target.value });
   };
 
@@ -123,22 +129,40 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
 
     const reader = new FileReader();
     reader.onload = (event) => {
+      setImageError(false);
       onUpdateSection(section.id, { content: event.target.result });
     };
     reader.readAsDataURL(file);
   };
 
-  const listItems = Array.isArray(section.content) ? section.content : [];
-  const tasksList = Array.isArray(section.content) ? section.content : [];
-  const completedTasksCount = tasksList.filter(t => t.completed).length;
-  const totalTasksCount = tasksList.length;
-  const progressPercent = totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0;
+  // Fix #3: Gate task computations to only run for tasks content type
+  const taskStats = useMemo(() => {
+    if (section.contentType !== 'tasks' || !Array.isArray(section.content)) {
+      return { total: 0, completed: 0, percent: 0 };
+    }
+    const total = section.content.length;
+    const completed = section.content.filter(t => t.completed).length;
+    return { total, completed, percent: total > 0 ? Math.round((completed / total) * 100) : 0 };
+  }, [section.contentType, section.content]);
 
-  const filteredTasks = tasksList.filter(t => {
-    if (taskFilter === 'active') return !t.completed;
-    if (taskFilter === 'completed') return t.completed;
-    return true;
-  });
+  const filteredTasks = useMemo(() => {
+    if (section.contentType !== 'tasks' || !Array.isArray(section.content)) return [];
+    if (taskFilter === 'active') return section.content.filter(t => !t.completed);
+    if (taskFilter === 'completed') return section.content.filter(t => t.completed);
+    return section.content;
+  }, [section.contentType, section.content, taskFilter]);
+
+  // List items helper (content is array of {id, text} objects)
+  const listItems = section.contentType === 'list' && Array.isArray(section.content) ? section.content : [];
+
+  // Helper to extract display text from list items (backward compat with plain strings)
+  const getItemText = (item) => {
+    if (typeof item === 'string') return item;
+    if (item && typeof item === 'object') return item.text || item.title || '';
+    return '';
+  };
+
+  const hasImageContent = section.contentType === 'image' && typeof section.content === 'string' && section.content.trim();
 
   return (
     <div className="section-detail-container" id="section-detail-container">
@@ -254,35 +278,38 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
               {listItems.length === 0 ? (
                 <li className="empty-list-notice">List is empty.</li>
               ) : (
-                listItems.map((item, idx) => (
-                  <li key={idx} className="content-list-row">
-                    <span className="list-bullet">•</span>
-                    {isEditMode ? (
-                      <input
-                        type="text"
-                        value={typeof item === 'string' ? item : item.title || ''}
-                        onInput={(e) => handleEditListItem(idx, e.target.value)}
-                        className="list-item-input"
-                        id={`list-item-input-${idx}`}
-                      />
-                    ) : (
-                      <span className="list-item-text">
-                        {typeof item === 'string' ? item : item.title || ''}
-                      </span>
-                    )}
+                listItems.map((item) => {
+                  // Fix #10: Use stable item ID as key
+                  const itemId = item.id || item;
+                  const itemText = getItemText(item);
+                  return (
+                    <li key={itemId} className="content-list-row">
+                      <span className="list-bullet">•</span>
+                      {isEditMode ? (
+                        <input
+                          type="text"
+                          value={itemText}
+                          onInput={(e) => handleEditListItem(item.id, e.target.value)}
+                          className="list-item-input"
+                          id={`list-item-input-${itemId}`}
+                        />
+                      ) : (
+                        <span className="list-item-text">{itemText}</span>
+                      )}
 
-                    {isEditMode && (
-                      <button
-                        className="btn-icon btn-remove-item"
-                        onClick={() => handleRemoveListItem(idx)}
-                        title="Delete item"
-                        id={`btn-remove-list-item-${idx}`}
-                      >
-                        ✕
-                      </button>
-                    )}
-                  </li>
-                ))
+                      {isEditMode && (
+                        <button
+                          className="btn-icon btn-remove-item"
+                          onClick={() => handleRemoveListItem(item.id)}
+                          title="Delete item"
+                          id={`btn-remove-list-item-${itemId}`}
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </li>
+                  );
+                })
               )}
             </ul>
             {isEditMode && (
@@ -299,7 +326,7 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
             <div className="task-list-header">
               <div className="task-header-title">
                 <span className="task-counter">
-                  {completedTasksCount} of {totalTasksCount} completed
+                  {taskStats.completed} of {taskStats.total} completed
                 </span>
               </div>
 
@@ -309,21 +336,21 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
                   onClick={() => setTaskFilter('all')}
                   id="filter-task-all"
                 >
-                  All ({totalTasksCount})
+                  All ({taskStats.total})
                 </button>
                 <button
                   className={`filter-btn ${taskFilter === 'active' ? 'active' : ''}`}
                   onClick={() => setTaskFilter('active')}
                   id="filter-task-active"
                 >
-                  Active ({totalTasksCount - completedTasksCount})
+                  Active ({taskStats.total - taskStats.completed})
                 </button>
                 <button
                   className={`filter-btn ${taskFilter === 'completed' ? 'active' : ''}`}
                   onClick={() => setTaskFilter('completed')}
                   id="filter-task-completed"
                 >
-                  Completed ({completedTasksCount})
+                  Completed ({taskStats.completed})
                 </button>
               </div>
             </div>
@@ -332,7 +359,7 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
             <div className="task-progress-track" style={{ margin: '12px 0' }}>
               <div
                 className="task-progress-fill"
-                style={{ width: `${progressPercent}%` }}
+                style={{ width: `${taskStats.percent}%` }}
               />
             </div>
 
@@ -360,7 +387,7 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
             <div className="task-items-container" id="task-items-container">
               {filteredTasks.length === 0 ? (
                 <div className="empty-tasks-notice">
-                  {totalTasksCount === 0 ? 'Task list is empty.' : 'No tasks found'}
+                  {taskStats.total === 0 ? 'Task list is empty.' : 'No tasks found'}
                 </div>
               ) : (
                 filteredTasks.map((task) => (
@@ -439,25 +466,21 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
               </div>
             )}
 
+            {/* Fix #5: Use state-driven image loading instead of DOM manipulation */}
             <div className="image-preview-wrapper">
-              {typeof section.content === 'string' && section.content.trim() ? (
+              {hasImageContent && !imageError && (
                 <img
                   src={section.content}
                   alt={section.title || 'Section Image'}
                   className="section-preview-image"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'block';
-                  }}
-                  onLoad={(e) => {
-                    e.target.style.display = 'block';
-                    e.target.nextSibling.style.display = 'none';
-                  }}
+                  onError={() => setImageError(true)}
                 />
-              ) : null}
-              <div className="image-error-fallback" style={{ display: !section.content ? 'block' : 'none' }}>
-                {section.content ? 'Failed to load image from URL' : 'No image selected'}
-              </div>
+              )}
+              {(!hasImageContent || imageError) && (
+                <div className="image-error-fallback">
+                  {imageError ? 'Failed to load image from URL' : 'No image selected'}
+                </div>
+              )}
             </div>
           </div>
         )}

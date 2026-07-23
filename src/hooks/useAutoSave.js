@@ -1,15 +1,21 @@
-import { useState, useEffect, useRef } from 'preact/hooks';
+import { useState, useEffect, useRef, useMemo } from 'preact/hooks';
 import { saveAppData } from '../utils/storage';
 
 export function useAutoSave(data, delay = 1500) {
   const [saveStatus, setSaveStatus] = useState('saved'); // 'saved' | 'saving' | 'error'
   const [lastSavedTime, setLastSavedTime] = useState(() => {
-    return data.lastSaved ? formatTimestamp(data.lastSaved) : formatTimestamp(Date.now());
+    return data.lastSaved ? formatTimestamp(data.lastSaved) : '';
   });
 
   const isFirstRender = useRef(true);
   const dataRef = useRef(data);
   dataRef.current = data;
+
+  // Fix #6: Only trigger save when section content actually changes,
+  // not when activeSectionId changes (which is a UI-only concern)
+  const sectionsSnapshot = useMemo(() => {
+    return JSON.stringify(data.sections);
+  }, [data.sections]);
 
   useEffect(() => {
     // Skip auto-save on initial mount
@@ -34,7 +40,7 @@ export function useAutoSave(data, delay = 1500) {
     }, delay);
 
     return () => clearTimeout(timer);
-  }, [data, delay]);
+  }, [sectionsSnapshot, delay]);
 
   return { saveStatus, lastSavedTime };
 }

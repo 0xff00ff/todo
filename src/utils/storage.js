@@ -40,17 +40,26 @@ export function saveAppData(data) {
 }
 
 /**
- * Convert content between text, list, tasks, and image formats
+ * Extract display text from any item format (string, {text}, {title})
+ */
+function itemToString(item) {
+  if (typeof item === 'string') return item.trim();
+  if (item && typeof item === 'object') {
+    return (item.text || item.title || '').trim();
+  }
+  return '';
+}
+
+/**
+ * Convert content between text, list, tasks, and image formats.
+ * List items use {id, text} objects for stable keys.
+ * Task items use {id, title, completed} objects.
  */
 export function convertContent(content, targetType) {
-  // Extract items as string array from any input format
+  // Extract plain string array from any input format
   const extractLines = (raw) => {
     if (Array.isArray(raw)) {
-      return raw.map(item => {
-        if (typeof item === 'string') return item.trim();
-        if (item && typeof item === 'object' && item.title) return item.title.trim();
-        return '';
-      }).filter(Boolean);
+      return raw.map(itemToString).filter(Boolean);
     }
     if (typeof raw === 'string') {
       return raw.split('\n').map(s => s.trim()).filter(Boolean);
@@ -59,20 +68,23 @@ export function convertContent(content, targetType) {
   };
 
   if (targetType === 'text') {
-    const lines = extractLines(content);
-    return lines.join('\n');
+    return extractLines(content).join('\n');
   }
 
   if (targetType === 'list') {
-    return extractLines(content);
+    // Convert to {id, text} objects with stable IDs
+    return extractLines(content).map((text, idx) => ({
+      id: 'li-' + Date.now() + '-' + idx,
+      text
+    }));
   }
 
   if (targetType === 'tasks') {
+    // Preserve existing task objects if already in correct format
     if (Array.isArray(content) && content.length > 0 && typeof content[0] === 'object' && 'completed' in content[0]) {
       return content;
     }
-    const lines = extractLines(content);
-    return lines.map((title, idx) => ({
+    return extractLines(content).map((title, idx) => ({
       id: 'task-' + Date.now() + '-' + idx,
       title,
       completed: false
@@ -81,8 +93,7 @@ export function convertContent(content, targetType) {
 
   if (targetType === 'image') {
     if (typeof content === 'string') return content;
-    const lines = extractLines(content);
-    return lines.join('\n');
+    return extractLines(content).join('\n');
   }
 
   return content;

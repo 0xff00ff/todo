@@ -232,10 +232,7 @@ body {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-.mode-indicator-label {
-  font-size: 0.8rem;
-  color: var(--text-dim);
-}
+
 
 .section-title-heading {
   font-size: 1.4rem;
@@ -508,16 +505,6 @@ body {
 }
 
 /* Tasks Section Styles */
-.task-list-section {
-  background: var(--bg-card);
-  padding: 20px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border-color);
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
 .task-list-header {
   display: flex;
   align-items: center;
@@ -530,11 +517,6 @@ body {
   display: flex;
   align-items: baseline;
   gap: 12px;
-}
-
-.task-header-title h3 {
-  font-size: 1.1rem;
-  font-weight: 600;
 }
 
 .task-counter {
@@ -576,10 +558,7 @@ body {
   transition: width 0.3s ease;
 }
 
-.task-input-row {
-  display: flex;
-  gap: 8px;
-}
+
 
 .task-add-input {
   flex: 1;
@@ -624,7 +603,8 @@ body {
   border-color: var(--border-color);
 }
 
-.task-card.completed .task-title-input {
+.task-card.completed .task-title-input,
+.task-card.completed .task-title-text {
   text-decoration: line-through;
   color: var(--text-dim);
 }
@@ -699,6 +679,18 @@ body {
 .btn-icon:hover {
   color: var(--danger);
   background: rgba(239, 68, 68, 0.1);
+}
+
+.btn-icon.confirming {
+  color: var(--warning);
+  background: rgba(245, 158, 11, 0.1);
+  font-size: 0.7rem;
+  opacity: 1;
+}
+
+.btn-icon.confirming:hover {
+  color: var(--danger);
+  background: rgba(239, 68, 68, 0.15);
 }
 
 /* Header Auto-Save Status Indicator */
