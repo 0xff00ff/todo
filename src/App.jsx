@@ -32,8 +32,13 @@ export function App() {
     const newSection = {
       id: newId,
       title: 'New Section',
-      contentType: 'text',
-      content: '',
+      blocks: [
+        {
+          id: 'blk-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+          type: 'text',
+          content: ''
+        }
+      ],
       createdAt: Date.now(),
       updatedAt: Date.now()
     };

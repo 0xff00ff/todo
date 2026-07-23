@@ -69,21 +69,7 @@ export function Sidebar({
         ) : (
           filteredSections.map(section => {
             const isActive = section.id === activeSectionId;
-            
-            let typeBadge = 'Text';
-            let itemCountInfo = null;
-
-            if (section.contentType === 'list' && Array.isArray(section.content)) {
-              typeBadge = 'List';
-              itemCountInfo = `${section.content.length} items`;
-            } else if (section.contentType === 'tasks' && Array.isArray(section.content)) {
-              typeBadge = 'Tasks';
-              const completed = section.content.filter(t => t.completed).length;
-              itemCountInfo = `${completed}/${section.content.length}`;
-            } else if (section.contentType === 'image') {
-              typeBadge = 'Image';
-            }
-
+            const blocksCount = Array.isArray(section.blocks) ? section.blocks.length : 0;
             const isConfirming = confirmDeleteId === section.id;
 
             return (
@@ -98,14 +84,10 @@ export function Sidebar({
                     {section.title || 'Untitled'}
                   </span>
                   <div className="section-item-meta">
-                    <span className={`type-badge badge-${section.contentType}`}>
-                      {typeBadge}
+                    <span className="type-badge badge-text">
+                      {blocksCount} {blocksCount === 1 ? 'block' : 'blocks'}
                     </span>
-                    {itemCountInfo && (
-                      <span className="task-count-badge">
-                        {itemCountInfo}
-                      </span>
-                    )}
+
                   </div>
                 </div>
 
