@@ -107,6 +107,7 @@ export function SectionDetail({ section, onUpdateSection, isEditMode }) {
             <button className="tab-btn" onClick={() => handleAddBlock('list')}>☑ List</button>
             <button className="tab-btn" onClick={() => handleAddBlock('tasks')}>☑️ Tasks</button>
             <button className="tab-btn" onClick={() => handleAddBlock('image')}>🖼 Image</button>
+            <button className="tab-btn" onClick={() => handleAddBlock('markdown')}>📝 Markdown</button>
           </div>
         </div>
       )}

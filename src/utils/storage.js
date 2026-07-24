@@ -148,7 +148,7 @@ export function convertContent(content, targetType) {
     return [];
   };
 
-  if (targetType === 'text') {
+  if (targetType === 'text' || targetType === 'markdown') {
     return extractLines(content).join('\n');
   }
 

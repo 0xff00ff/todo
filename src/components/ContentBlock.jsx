@@ -1,6 +1,8 @@
 import { h } from 'preact';
 import { useState, useMemo } from 'preact/hooks';
 import { convertContent } from '../utils/storage';
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 
 export function ContentBlock({
   block,
@@ -203,6 +205,12 @@ export function ContentBlock({
               >
                 🖼 Image
               </button>
+              <button
+                className={`tab-btn ${block.type === 'markdown' ? 'active' : ''}`}
+                onClick={() => handleTypeChange('markdown')}
+              >
+                📝 Markdown
+              </button>
             </div>
           </div>
           <div className="block-actions">
@@ -235,6 +243,35 @@ export function ContentBlock({
 
       {/* Block Body */}
       <div className="block-body">
+        {/* MARKDOWN MODE */}
+        {block.type === 'markdown' && (
+          <div className="editor-mode-markdown">
+            {isEditMode ? (
+              <div className="markdown-editor-container">
+                <textarea
+                  value={typeof block.content === 'string' ? block.content : ''}
+                  onInput={handleTextChange}
+                  placeholder="Enter markdown here..."
+                  className="content-textarea"
+                  rows={6}
+                />
+                <div className="markdown-preview-panel">
+                  <h4>Preview</h4>
+                  <div 
+                    className="markdown-content"
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(marked.parse(typeof block.content === 'string' ? block.content : '')) }} 
+                  />
+                </div>
+              </div>
+            ) : (
+              <div 
+                className="markdown-content"
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(marked.parse(typeof block.content === 'string' ? block.content : '')) }} 
+              />
+            )}
+          </div>
+        )}
+
         {/* TEXT MODE */}
         {block.type === 'text' && (
           <div className="editor-mode-text">
