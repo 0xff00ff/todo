@@ -146,7 +146,22 @@ export function App() {
       ...prev,
       sections: prev.sections.map(sec => {
         if (sec.id === id) {
-          return { ...sec, isPinned: !sec.isPinned, updatedAt: Date.now() };
+          const newPinned = !sec.isPinned;
+          return { ...sec, isPinned: newPinned, isArchived: newPinned ? false : sec.isArchived, updatedAt: Date.now() };
+        }
+        return sec;
+      })
+    }));
+  };
+
+  // Handler: Toggle Archive (Anti-pin) Section
+  const handleToggleArchiveSection = (id) => {
+    setAppData(prev => ({
+      ...prev,
+      sections: prev.sections.map(sec => {
+        if (sec.id === id) {
+          const newArchived = !sec.isArchived;
+          return { ...sec, isArchived: newArchived, isPinned: newArchived ? false : sec.isPinned, updatedAt: Date.now() };
         }
         return sec;
       })
@@ -163,6 +178,7 @@ export function App() {
         onCreateSection={handleCreateSection}
         onDeleteSection={handleDeleteSection}
         onTogglePin={handleTogglePinSection}
+        onToggleArchive={handleToggleArchiveSection}
         isEditMode={isEditMode}
       />
 

@@ -8,6 +8,7 @@ export function Sidebar({
   onCreateSection,
   onDeleteSection,
   onTogglePin,
+  onToggleArchive,
   isEditMode
 }) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -16,8 +17,12 @@ export function Sidebar({
   const filteredSections = sections
     .filter(sec => sec.title.toLowerCase().includes(searchQuery.toLowerCase()))
     .sort((a, b) => {
+      // 1. Pinned items at top
       if (a.isPinned && !b.isPinned) return -1;
       if (!a.isPinned && b.isPinned) return 1;
+      // 2. Archived items at bottom
+      if (a.isArchived && !b.isArchived) return 1;
+      if (!a.isArchived && b.isArchived) return -1;
       return 0;
     });
 
@@ -107,6 +112,16 @@ export function Sidebar({
                       title={section.isPinned ? 'Unpin section' : 'Pin section to top'}
                     >
                       {section.isPinned ? '📌' : '📍'}
+                    </button>
+                    <button
+                      className={`btn-icon btn-archive-section ${section.isArchived ? 'archived' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onToggleArchive) onToggleArchive(section.id);
+                      }}
+                      title={section.isArchived ? 'Unarchive section' : 'Move to bottom (Anti-pin)'}
+                    >
+                      {section.isArchived ? '⬆️' : '⬇️'}
                     </button>
                     <button
                       className={`btn-icon btn-delete-section ${isConfirming ? 'confirming' : ''}`}

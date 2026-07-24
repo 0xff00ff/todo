@@ -185,6 +185,11 @@ body {
   color: var(--warning);
 }
 
+.btn-archive-section.archived {
+  opacity: 1;
+  color: var(--text-dim);
+}
+
 /* Main Content Area (Right Part) */
 .main-content {
   flex: 1;
