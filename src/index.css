@@ -185,9 +185,18 @@ body {
   color: var(--warning);
 }
 
+.btn-archive-section {
+  filter: grayscale(100%) opacity(40%);
+  transition: filter 0.2s ease;
+}
+
+.btn-archive-section:hover {
+  filter: grayscale(0%) opacity(100%);
+}
+
 .btn-archive-section.archived {
+  filter: none;
   opacity: 1;
-  color: var(--text-dim);
 }
 
 /* Main Content Area (Right Part) */

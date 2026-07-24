@@ -90,9 +90,17 @@ export function Sidebar({
                 id={`section-item-${section.id}`}
               >
                 <div className="section-item-main">
-                  <span className="section-item-title">
-                    {section.title || 'Untitled'}
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                    <span className="section-item-title">
+                      {section.title || 'Untitled'}
+                    </span>
+                    {!isEditMode && (
+                      <div style={{ flexShrink: 0, fontSize: '0.9rem', opacity: 0.5 }}>
+                        {section.isPinned && <span title="Pinned">📌</span>}
+                        {section.isArchived && <span title="Anti-pinned (Anchor)">⚓</span>}
+                      </div>
+                    )}
+                  </div>
                   <div className="section-item-meta">
                     <span className="type-badge badge-text">
                       {blocksCount} {blocksCount === 1 ? 'block' : 'blocks'}
@@ -121,7 +129,7 @@ export function Sidebar({
                       }}
                       title={section.isArchived ? 'Unarchive section' : 'Move to bottom (Anti-pin)'}
                     >
-                      {section.isArchived ? '⬆️' : '⬇️'}
+                      {section.isArchived ? '⚓' : '⚓'}
                     </button>
                     <button
                       className={`btn-icon btn-delete-section ${isConfirming ? 'confirming' : ''}`}
