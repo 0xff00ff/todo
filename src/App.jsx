@@ -69,7 +69,7 @@ export function App() {
     setAppData(prev => ({ ...prev, isEditMode: newValue }));
   };
 
-  const { saveStatus, lastSavedTime } = useAutoSave(appData, 1500, tabId, skipNextSave);
+  const { saveStatus, lastSavedTime } = useAutoSave(appData, 500, tabId, skipNextSave);
 
   const activeSection = useMemo(() => {
     return appData.sections.find(s => s.id === appData.activeSectionId) || appData.sections[0] || null;
