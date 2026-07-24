@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'preact/hooks';
 import { saveAppData } from '../utils/storage';
 
-export function useAutoSave(data, delay = 1500) {
+export function useAutoSave(data, delay = 1500, tabId = 'unknown', skipNextSaveRef = null) {
   const [saveStatus, setSaveStatus] = useState('saved'); // 'saved' | 'saving' | 'error'
   const [lastSavedTime, setLastSavedTime] = useState(() => {
     return data.lastSaved ? formatTimestamp(data.lastSaved) : '';
@@ -10,6 +10,8 @@ export function useAutoSave(data, delay = 1500) {
   const isFirstRender = useRef(true);
   const dataRef = useRef(data);
   dataRef.current = data;
+
+  const syncChannel = useMemo(() => new BroadcastChannel('todo_manager_sync'), []);
 
   // Fix #6: Only trigger save when actual persisted content changes,
   // not when activeSectionId changes (which is a UI-only concern)
@@ -27,23 +29,30 @@ export function useAutoSave(data, delay = 1500) {
       return;
     }
 
+    // Skip auto-save if this state change came from a cross-tab sync
+    if (skipNextSaveRef && skipNextSaveRef.current) {
+      skipNextSaveRef.current = false;
+      return;
+    }
+
     setSaveStatus('saving');
 
-    const timer = setTimeout(() => {
+    const timer = setTimeout(async () => {
       const now = Date.now();
       const updatedData = { ...dataRef.current, lastSaved: now };
-      const success = saveAppData(updatedData);
+      const success = await saveAppData(updatedData);
 
       if (success) {
         setSaveStatus('saved');
         setLastSavedTime(formatTimestamp(now));
+        syncChannel.postMessage({ type: 'DATA_UPDATED', timestamp: now, sender: tabId });
       } else {
         setSaveStatus('error');
       }
     }, delay);
 
     return () => clearTimeout(timer);
-  }, [saveTriggerSnapshot, delay]);
+  }, [saveTriggerSnapshot, delay, syncChannel, tabId]);
 
   return { saveStatus, lastSavedTime };
 }
